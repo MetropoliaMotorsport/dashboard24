@@ -1,28 +1,27 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-//#include "Adafruit_HX8357.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+//#include "../../Drivers/LCD/Inc/Adafruit_HX8357.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,22 +52,6 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 /* USER CODE BEGIN PFP */
-void ST7735_FillRectangle(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) {
-    // clipping
-
-	HAL_GPIO_WritePin(ST7735_CS_GPIO_Port, ST7735_CS_Pin, GPIO_PIN_RESET);
-    ST7735_SetAddressWindow(x, y, x+w-1, y+h-1);
-
-    uint8_t data[] = { color >> 8, color & 0xFF };
-    HAL_GPIO_WritePin(ST7735_DC_GPIO_Port, ST7735_DC_Pin, GPIO_PIN_SET);
-    for(y = h; y > 0; y--) {
-        for(x = w; x > 0; x--) {
-            HAL_SPI_Transmit(&ST7735_SPI_PORT, data, sizeof(data), HAL_MAX_DELAY);
-        }
-    }
-
-    ST7735_Unselect();
-}
 
 /* USER CODE END PFP */
 
@@ -93,13 +76,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  /*
-   * MOSI PB 5
-   * CLK PB 3
-   * CS PA 4
-   *DC PB 4
-   * REST PC 7
-   */
 
   /* USER CODE END Init */
 
@@ -111,57 +87,19 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  	 MX_GPIO_Init();
-  	 MX_SPI1_Init();
+  MX_GPIO_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  	uint8_t tx_data = 0xAA;
-    uint8_t rx_data;
-    bool anything = 0;
-
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  //ST7735_Init();
-  while (1)
-  {
-	  HAL_GPIO_WritePin(ST7735_CS_GPIO_Port, ST7735_CS_Pin, GPIO_PIN_RESET); // Set CS pin low to select the slave
-
-	  if(HAL_SPI_TransmitReceive(&hspi1, &tx_data, &rx_data, 1, 500) == HAL_OK)
-	  {
-		// Communication successful
-		// You can add further processing or checks here
-		anything = 1;
-	  }
-	  HAL_GPIO_WritePin(ST7735_CS_GPIO_Port, ST7735_CS_Pin, GPIO_PIN_SET); // Set CS pin high to deselect the slave
-	  HAL_Delay(3000);
+	while (1) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  /*
-	  HAL_GPIO_WritePin(ST7735_RES_GPIO_Port, ST7735_RES_Pin, GPIO_PIN_RESET);
-	  HAL_Delay(1000);
-	  HAL_GPIO_WritePin(ST7735_RES_GPIO_Port, ST7735_RES_Pin, GPIO_PIN_SET);
-	  HAL_Delay(1000);
-	  */
-	  /*
-	  ST7735_FillScreen(HX8357_BLACK);
-
-	      for(int x = 0; x < HX8357_TFTWIDTH; x++) {
-	          ST7735_DrawPixel(x, 0, HX8357_RED);
-	          ST7735_DrawPixel(x, HX8357_TFTHEIGHT-1, HX8357_RED);
-	      }
-
-	      for(int y = 0; y < HX8357_TFTHEIGHT; y++) {
-	          ST7735_DrawPixel(0, y, HX8357_RED);
-	          ST7735_DrawPixel(HX8357_TFTWIDTH-1, y, HX8357_RED);
-	      }
-
-	      HAL_Delay(3000);
-	      */
-
-  }
+	}
   /* USER CODE END 3 */
 }
 
@@ -285,13 +223,10 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(ST7735_CS_GPIO_Port, ST7735_CS_Pin, GPIO_PIN_RESET);
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(ST7735_RES_GPIO_Port, ST7735_RES_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(ST7735_DC_GPIO_Port, ST7735_DC_Pin, GPIO_PIN_RESET);
@@ -302,13 +237,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(ST7735_CS_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : ST7735_RES_Pin */
-  GPIO_InitStruct.Pin = ST7735_RES_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(ST7735_RES_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : ST7735_DC_Pin */
   GPIO_InitStruct.Pin = ST7735_DC_Pin;
@@ -332,11 +260,10 @@ static void MX_GPIO_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
-  while (1)
-  {
-  }
+	/* User can add his own implementation to report the HAL error return state */
+	__disable_irq();
+	while (1) {
+	}
   /* USER CODE END Error_Handler_Debug */
 }
 
